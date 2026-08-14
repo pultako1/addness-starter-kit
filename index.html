@@ -1,0 +1,371 @@
+<title>AIと働く環境の立ち上げガイド</title>
+<style>
+  :root {
+    --ground: #FAFAF7;
+    --surface: #FFFFFF;
+    --ink: #1C2320;
+    --muted: #5D6763;
+    --accent: #0E7A64;
+    --accent-ink: #0A5C4B;
+    --accent-soft: #E3F1EC;
+    --line: #E2E7E3;
+    --code-bg: #F2F5F2;
+    --warn-ink: #9A5B10;
+    --warn-bg: #FBF1E1;
+    --warn-line: #ECD9B8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101412;
+      --surface: #181D1A;
+      --ink: #E7ECE8;
+      --muted: #9BA6A0;
+      --accent: #2E9C80;
+      --accent-ink: #5ECBAD;
+      --accent-soft: #1C2C26;
+      --line: #29302C;
+      --code-bg: #121815;
+      --warn-ink: #E4A65A;
+      --warn-bg: #2A2118;
+      --warn-line: #453722;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101412;
+    --surface: #181D1A;
+    --ink: #E7ECE8;
+    --muted: #9BA6A0;
+    --accent: #2E9C80;
+    --accent-ink: #5ECBAD;
+    --accent-soft: #1C2C26;
+    --line: #29302C;
+    --code-bg: #121815;
+    --warn-ink: #E4A65A;
+    --warn-bg: #2A2118;
+    --warn-line: #453722;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic Medium", "Yu Gothic", Meiryo, system-ui, sans-serif;
+    line-height: 1.9;
+    margin: 0;
+    padding: 0 20px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: .14em;
+    color: var(--accent-ink);
+    font-weight: 600;
+    margin: 48px 0 10px;
+  }
+  h1 {
+    font-size: clamp(26px, 5vw, 34px);
+    line-height: 1.4;
+    margin: 0 0 14px;
+    font-weight: 700;
+    text-wrap: balance;
+  }
+  .lead { color: var(--muted); margin: 0 0 8px; font-size: 16px; }
+  .lead strong { color: var(--ink); }
+  .draft-note {
+    display: flex; gap: 10px; align-items: baseline;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-line);
+    color: var(--warn-ink);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin: 20px 0 28px;
+  }
+  .os-switch {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    background: var(--surface);
+  }
+  .os-switch button {
+    appearance: none; border: 0; background: transparent;
+    font: inherit; color: var(--muted);
+    padding: 7px 22px; cursor: pointer; font-size: 14px;
+  }
+  .os-switch button.active { background: var(--accent); color: #fff; font-weight: 600; }
+  .os-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .card, .step {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px 28px 24px;
+    margin: 22px 0;
+  }
+  .step-head { display: flex; gap: 14px; align-items: baseline; margin-bottom: 6px; }
+  .step-num {
+    flex: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px;
+    background: var(--accent); color: #fff;
+    border-radius: 50%;
+    font-size: 15px; font-weight: 700;
+    transform: translateY(6px);
+    font-variant-numeric: tabular-nums;
+  }
+  .step h2, .card h2 { font-size: 20px; margin: 0; line-height: 1.5; }
+  .card h2 { margin-bottom: 4px; }
+  .step p, .card p { margin: 10px 0; }
+  .why { color: var(--muted); font-size: 14px; margin-top: 2px; }
+
+  .dl-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff;
+    text-decoration: none;
+    font-weight: 700; font-size: 15.5px;
+    border-radius: 10px;
+    padding: 13px 26px;
+    margin: 10px 0 4px;
+  }
+  .dl-btn:hover { filter: brightness(1.07); }
+  .dl-btn:focus-visible { outline: 3px solid var(--accent-soft); }
+  .dl-btn .arr { font-size: 18px; line-height: 1; }
+  .dl-btn.secondary {
+    background: var(--surface); color: var(--accent-ink);
+    border: 1.5px solid var(--accent);
+  }
+  .dl-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+  .os-block { border-top: 1px dashed var(--line); padding-top: 14px; margin-top: 16px; }
+  .os-label {
+    font-size: 12px; font-weight: 700; letter-spacing: .1em;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  body[data-os="mac"] .win { display: none; }
+  body[data-os="win"] .mac { display: none; }
+
+  ol.mini { margin: 8px 0 0; padding-left: 22px; }
+  ol.mini li { margin: 6px 0; }
+  ol.mini li::marker { color: var(--accent-ink); font-weight: 700; }
+
+  .say {
+    position: relative;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 100px 12px 16px;
+    margin: 14px 0;
+    font-size: 15.5px;
+  }
+  .say .say-label {
+    display: block; font-size: 11px; font-weight: 700;
+    letter-spacing: .12em; color: var(--accent-ink); margin-bottom: 2px;
+  }
+  .copy-btn {
+    position: absolute; top: 10px; right: 10px;
+    appearance: none; border: 1px solid var(--line);
+    background: var(--surface); color: var(--muted);
+    font: inherit; font-size: 12px;
+    border-radius: 7px; padding: 4px 10px; cursor: pointer;
+  }
+  .copy-btn:hover { color: var(--ink); }
+  .copy-btn:focus-visible { outline: 2px solid var(--accent); }
+
+  .check {
+    display: flex; gap: 10px;
+    background: var(--accent-soft);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 18px;
+    font-size: 14.5px;
+  }
+  .check .mark { color: var(--accent-ink); font-weight: 700; flex: none; }
+  .check b { color: var(--accent-ink); }
+
+  .todo {
+    display: inline-block;
+    font-size: 11.5px; font-weight: 700;
+    color: var(--warn-ink);
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-line);
+    border-radius: 6px;
+    padding: 1px 8px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: .06em;
+  }
+
+  ul.plain { padding-left: 0; list-style: none; margin: 12px 0 0; }
+  ul.plain li {
+    padding: 9px 0 9px 30px;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  ul.plain li:last-child { border-bottom: 0; }
+  ul.plain li::before {
+    content: "";
+    position: absolute; left: 4px; top: 17px;
+    width: 14px; height: 14px;
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    opacity: .75;
+  }
+  .fine { color: var(--muted); font-size: 13px; }
+
+  .flow { margin: 12px 0 0; padding-left: 0; list-style: none; }
+  .flow li {
+    position: relative;
+    padding: 0 0 14px 26px;
+  }
+  .flow li::before {
+    content: "";
+    position: absolute; left: 6px; top: 10px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .flow li:not(:last-child)::after {
+    content: "";
+    position: absolute; left: 9.5px; top: 22px; bottom: -4px;
+    width: 1.5px; background: var(--line);
+  }
+  .flow b { color: var(--accent-ink); }
+
+  footer {
+    margin-top: 44px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13.5px;
+  }
+  a { color: var(--accent-ink); }
+  @media (prefers-reduced-motion: no-preference) {
+    .copy-btn { transition: color .15s ease; }
+    .dl-btn { transition: filter .15s ease; }
+  }
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">アドネス 法人導入支援｜初期導入</p>
+  <h1>AIと働く環境の立ち上げガイド</h1>
+  <p class="lead">やることは3つだけ。<strong>アプリを入れる、作業場のもとを置く、ひとこと話しかける。</strong>あとはAIが道案内します。所要30分ほど、専門知識もターミナルもいりません。</p>
+  <div class="draft-note"><span>ドラフト v3</span><span>残る確認はサポート連絡先（LINE）の記載のみ。確定したらこの帯を外してお客様に共有できます。</span></div>
+
+  <div class="os-switch" role="group" aria-label="お使いのパソコン">
+    <button type="button" data-os="mac">Mac</button>
+    <button type="button" data-os="win">Windows</button>
+  </div>
+  <p class="fine">お使いのパソコンを選ぶと、関係する手順だけが表示されます。</p>
+
+  <section class="card">
+    <h2>そろえるもの</h2>
+    <ul class="plain">
+      <li>Claudeのアカウント（有料プラン：Pro以上。会社での導入はTeamプラン）</li>
+      <li>Addnessのアカウント（<a href="https://addness.com">addness.com</a> にアクセスして登録するだけ）</li>
+      <li>自分のパソコン（Mac、またはWindows 10・11）</li>
+    </ul>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">1</span><h2>Claudeアプリを入れる</h2></div>
+    <p class="why">話しかけるだけで、あなたのパソコン上で実際に作業をしてくれるAIです。</p>
+
+    <div class="os-block mac">
+      <p class="os-label">MACの場合</p>
+      <a class="dl-btn" href="https://claude.ai/api/desktop/darwin/universal/dmg/latest/redirect"><span class="arr">↓</span>Mac用Claudeをダウンロード</a>
+      <p class="dl-sub">Intel・Appleシリコンどちらでも動きます</p>
+      <ol class="mini">
+        <li>ダウンロードしたファイルを開き、Claudeのアイコンを「Applications」へドラッグ</li>
+        <li>アプリケーションからClaudeを起動</li>
+        <li>Claudeのアカウントでサインイン</li>
+      </ol>
+    </div>
+
+    <div class="os-block win">
+      <p class="os-label">WINDOWSの場合</p>
+      <a class="dl-btn" href="https://claude.ai/api/desktop/win32/x64/setup/latest/redirect"><span class="arr">↓</span>Windows用Claudeをダウンロード</a>
+      <ol class="mini">
+        <li>ダウンロードしたファイルを実行し、画面の指示どおりに進める</li>
+        <li>Claudeを起動して、Claudeのアカウントでサインイン</li>
+      </ol>
+    </div>
+
+    <div class="check"><span class="mark">確認</span><span>Claudeアプリが開いてサインインでき、上部に <b>Chat / Cowork / Code</b> のタブが見えたらOKです。</span></div>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">2</span><h2>「作業場のもと」を置く</h2></div>
+    <p class="why">アドネスが用意した、AIと働くための作業場のひな形です。Addnessとの接続設定も中に入っています。</p>
+    <a class="dl-btn" href="https://pultako1.github.io/addness-starter-kit/メイン作業場のもと.zip"><span class="arr">↓</span>作業場のもとをダウンロード</a>
+    <p class="dl-sub">小さなZIPファイルがダウンロードされます</p>
+    <ol class="mini">
+      <li>ダウンロードしたZIPをダブルクリックで展開</li>
+      <li>出てきた「<strong>メイン作業場</strong>」フォルダを、まるごとデスクトップへ移動</li>
+    </ol>
+    <div class="check"><span class="mark">確認</span><span>デスクトップに「<b>メイン作業場</b>」フォルダがあればOKです。</span></div>
+  </section>
+
+  <section class="step">
+    <div class="step-head"><span class="step-num">3</span><h2>フォルダを開いて、ひとこと話しかける</h2></div>
+    <p class="why">ここからはAIが道案内。画面に出ることに答えていくだけです。</p>
+    <ol class="mini">
+      <li>Claudeアプリ上部の「<strong>Code</strong>」タブをクリック</li>
+      <li>「<strong>Local</strong>」を選び、「<strong>Select folder</strong>」で先ほどの「メイン作業場」を選ぶ</li>
+      <li>下の入力欄に、最初のことばを入れて送信</li>
+    </ol>
+    <div class="say"><span class="say-label">最初のことば</span><span class="say-text">セットアップを始めてください。</span><button class="copy-btn" type="button">コピー</button></div>
+    <p>そのあとAIが、順番にここまで連れて行ってくれます：</p>
+    <ul class="flow">
+      <li><b>Addnessとつながる</b> — 接続の確認が出たら「承認」を押し、開いたブラウザでAddnessにログイン</li>
+      <li><b>あなたを知る</b> — 名前や仕事内容をAIがヒアリング</li>
+      <li><b>作業場が組み上がる</b> — あなた専用の作業場と道しるべのゴールがAddnessにできる</li>
+    </ul>
+    <div class="check"><span class="mark">確認</span><span>Addnessを開いて、自分のところに「<b>AIと働くメイン作業場を作る</b>」というゴールが見えたら、立ち上げ完了です。</span></div>
+  </section>
+
+  <section class="card">
+    <h2>あしたからの合言葉</h2>
+    <p class="why">立ち上げのあとは、朝これだけ言えば仕事が始まります。</p>
+    <div class="say"><span class="say-label">毎日のはじめかた</span><span class="say-text">Addnessのゴールの続きを、一緒に進めて。</span><button class="copy-btn" type="button">コピー</button></div>
+  </section>
+
+  <section class="card">
+    <h2>そのさきへ：プロジェクト全体像の可視化</h2>
+    <p class="why">自分の作業場で仕事が回りはじめたら、次はプロジェクト全体をAddnessに乗せて、チームの動きが見える状態へ進みます。</p>
+    <div class="say"><span class="say-label">準備ができたら</span><span class="say-text">次のステップ、プロジェクト全体像の可視化に進みたい。</span><button class="copy-btn" type="button">コピー</button></div>
+    <p class="fine"><span class="todo">準備中：この先のテンプレートは現在作成中</span></p>
+  </section>
+
+  <footer>
+    <p>途中で止まったら、そのままの画面をスクリーンショットして、導入サポートのLINEグループに送ってください。<span class="todo">要確認：連絡先の書き方</span></p>
+    <p>アドネス株式会社｜法人導入支援</p>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var isMac = /Mac/.test(navigator.platform || "");
+    function setOS(os) {
+      document.body.dataset.os = os;
+      document.querySelectorAll(".os-switch button").forEach(function (b) {
+        b.classList.toggle("active", b.dataset.os === os);
+      });
+    }
+    setOS(isMac ? "mac" : "win");
+    document.querySelectorAll(".os-switch button").forEach(function (b) {
+      b.addEventListener("click", function () { setOS(b.dataset.os); });
+    });
+    document.querySelectorAll(".copy-btn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var box = btn.parentElement;
+        var src = box.querySelector("code") || box.querySelector(".say-text");
+        var text = src ? src.textContent.trim() : "";
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = "コピーしました";
+          setTimeout(function () { btn.textContent = "コピー"; }, 1600);
+        });
+      });
+    });
+  })();
+</script>
